@@ -28,7 +28,7 @@ if __name__ == '__main__':
     NUM_FORMIGAS = 15
     NUM_CORPOS = 600
     
-    ITERACOES = 50
+    ITERACOES = 1
     
     mapa = Mapa(ALTURA, LARGURA)
     formigas = []
@@ -62,6 +62,10 @@ if __name__ == '__main__':
             formiga.mover(direcao, LARGURA, ALTURA)
             
         print_mapa(mapa, corpos, formigas)
+        
+        densidade = formigas[0].calcular_densidade_local(mapa)
+        print(formigas[0].x, formigas[0].y)
+        print(f'Densidade local da formiga 0: {densidade}')
         sleep(0.5)
         subprocess.call('clear', shell=True)
         

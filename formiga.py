@@ -25,4 +25,26 @@ class Formiga:
             self.x = self.x + 1
             if self.x >= largura:
                 self.x = 0
+                
+    def calcular_densidade_local(self, mapa):
+        corpos = 0
+        celulas_vistas = 0
         
+        altura = len(mapa.matriz)
+        largura = len(mapa.matriz[0])
+        
+        for dy in range( -self.raio, self.raio+1):
+            for dx in range(-self.raio, self.raio+1):
+                
+                if(dx == 0 and dy ==0):
+                    continue # Propria posicao da formiga
+                
+                celulas_vistas += 1
+                
+                if(mapa.matriz[dy][dx] == 'C'):
+                    corpos += 1    
+
+        if(celulas_vistas == 0):
+            return 0
+        
+        return corpos/celulas_vistas
