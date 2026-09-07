@@ -7,7 +7,7 @@ class Mapa:
         self.largura = largura
         self.matriz = [[' ' for _ in range(largura)] for _ in range(altura)]
         
-    #TODO: Passar o print_mapa pra cá
+    #TODO: Passar o print_mapa pra cá 
         
                 
     

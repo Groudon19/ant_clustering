@@ -25,4 +25,36 @@ class Formiga:
             self.x = self.x + 1
             if self.x >= largura:
                 self.x = 0
+                
+    def calcular_densidade_local(self, mapa):
+        corpos = 0
+        celulas_vistas = 0
+
+        altura = mapa.altura
+        largura = mapa.largura
         
+        for dy in range( -self.raio, self.raio+1):
+            for dx in range(-self.raio, self.raio+1):
+
+                if(dx == 0 and dy ==0):
+                    continue
+
+                x = (self.x + dx) % largura
+                y = (self.y + dy) % altura
+                celulas_vistas += 1
+
+                if mapa.matriz[y][x] == 'C':
+                    corpos += 1
+
+        if(celulas_vistas == 0):
+            return 0
+
+        return corpos/celulas_vistas
+    
+    def probabilidade_pegar(self, mapa):
+        densidade = self.calcular_densidade_local(mapa)
+        return  1 - densidade
+    
+    def probabilidade_largar(self, mapa):
+        densidade = self.calcular_densidade_local(mapa)
+        return densidade
