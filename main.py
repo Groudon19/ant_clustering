@@ -20,6 +20,28 @@ def print_mapa(mapa, corpos, formigas):
             print(mapa.matriz[i][j] if not mapa.matriz[i][j] == 'F' else ' ', end=' ')
         print(end='\n')
 
+
+def carregar_corpos(caminho):
+    corpos = []
+
+    with open(caminho, 'r') as f:
+        for linha in f:
+            linha = linha.strip()
+
+            if linha == "" or linha.startswith("#"):
+                continue
+
+            partes = linha.split()
+
+            x = float(partes[0].replace(",", "."))
+            y = float(partes[1].replace(",", "."))
+            grupo = int(partes[2])
+
+            corpos.append(Corpo(x, y, grupo))
+
+    return corpos
+
+
 if __name__ == '__main__':
     
     ALTURA = 50
