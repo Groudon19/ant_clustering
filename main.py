@@ -28,7 +28,7 @@ if __name__ == '__main__':
     NUM_FORMIGAS = 15
     NUM_CORPOS = 600
     
-    ITERACOES = 100000
+    ITERACOES = 400000
     
     mapa = Mapa(ALTURA, LARGURA)
     formigas = []
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             direcao = r.choice(['cima', 'baixo', 'esquerda', 'direita'])
             formiga.mover(direcao, LARGURA, ALTURA)
             
-        if i == 1 or i == 99999:
+        if i == 1 or i == 99999 or i == 199999 or i == 399999:
             print(f'Iteracao {i + 1}')
             print_mapa(mapa, corpos, formigas)
         
