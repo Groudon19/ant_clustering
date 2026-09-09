@@ -1,120 +1,87 @@
+# main.py
 import random as r
-import subprocess
-
-from time import sleep
-
 from mapa import Mapa
 from formiga import Formiga
 from corpo import Corpo
+from utils import carregar_e_normalizar_base
 
-def print_mapa(mapa, corpos, formigas):
-    
-    # for corpo in corpos:
-    #     mapa.matriz[corpo.y][corpo.x] = 'C'
-        
-    # for formiga in formigas:
-    #     mapa.matriz[formiga.y][formiga.x] = 'F'
-    
-    for i in range(mapa.largura):
-        for j in range(mapa.altura):
-            print(mapa.matriz[i][j] if not mapa.matriz[i][j] == 'F' else ' ', end=' ')
-        print(end='\n')
+def print_mapa_grupos(mapa, formigas):
+    # Cria uma cópia visual temporária
+    matriz_visual = [linha[:] for linha in mapa.matriz]
 
+    # Desenha as formigas
+    for f in formigas:
+        matriz_visual[f.y][f.x] = 'F'
 
-def carregar_corpos(caminho):
-    corpos = []
+    # Imprime no terminal
+    for i in range(mapa.altura):
+        linha_str = ""
+        for j in range(mapa.largura):
+            corpo = mapa.obter_corpo_em(j, i)
+            if matriz_visual[i][j] == 'F':
+                linha_str += ' '
+            elif corpo is not None:
+                linha_str += f'{corpo.grupo} '
+            else:
+                linha_str += ' '
+        print(linha_str)
 
-    with open(caminho, 'r') as f:
-        for linha in f:
-            linha = linha.strip()
-
-            if linha == "" or linha.startswith("#"):
-                continue
-
-            partes = linha.split()
-
-            x = float(partes[0].replace(",", "."))
-            y = float(partes[1].replace(",", "."))
-            grupo = int(partes[2])
-
-            corpos.append(Corpo(x, y, grupo))
-
-    return corpos
 
 
 if __name__ == '__main__':
-    
-    ALTURA = 50
-    LARGURA = 50
-    
+    ALTURA, LARGURA = 50, 50
     NUM_FORMIGAS = 15
-    NUM_CORPOS = 600
-    
     ITERACOES = 100000
+    K1, K2 = 0.3, 0.05
+    ALPHA = 2.0
+
+    # 1. Carrega e normaliza os dados da base sintética
+    dados_norm, grupos = carregar_e_normalizar_base('base4.txt')
     
     mapa = Mapa(ALTURA, LARGURA)
-    formigas = []
-    corpos = []
     
-    for i in range(NUM_CORPOS):
-        x = r.randint(0, LARGURA-1)
-        y = r.randint(0, ALTURA-1)
-        if mapa.matriz[y][x] == ' ':
-            corpos.append(Corpo(x, y))
-            mapa.matriz[y][x] = 'C'
-        else:
-            i -= 1
-    
-    for i in range(NUM_FORMIGAS):
-        x = r.randint(0, LARGURA-1)
-        y = r.randint(0, ALTURA-1)
-        if mapa.matriz[y][x] == ' ':
-            formigas.append(Formiga(x, y, 1))
-            mapa.matriz[y][x] = 'F'
-        else:
-            #TODO: Analisar se formiga pode nascer em cima de corpo ou não
-            i -= 1
-    
-    
-    for i in range(ITERACOES):
-        
+    # 2. Inicializa Corpos no mapa
+    for attrs, grp in zip(dados_norm, grupos):
+        while True:
+            x, y = r.randint(0, LARGURA - 1), r.randint(0, ALTURA - 1)
+            if mapa.obter_corpo_em(x, y) is None:
+                corpo = Corpo(x, y, attrs, grp)
+                mapa.adicionar_corpo(corpo)
+                break
+
+    # 3. Inicializa Formigas
+    formigas = [Formiga(r.randint(0, LARGURA - 1), r.randint(0, ALTURA - 1), raio=2) 
+                for _ in range(NUM_FORMIGAS)]
+
+    # 4. Loop de Simulação
+    for iteracao in range(ITERACOES):
         for formiga in formigas:
-            
-            
-            x = formiga.x
-            y = formiga.y
+            x, y = formiga.x, formiga.y
 
             if formiga.ocupado:
-                if mapa.matriz[y][x] == ' ': # só pode largar em célula vazia
-                    p_largar = formiga.probabilidade_largar(mapa)
+                # Se a posição atual está vazia, avalia largar o corpo
+                if mapa.obter_corpo_em(x, y) is None:
+                    p_largar = formiga.probabilidade_largar(mapa, formiga.corpo_carregado, k2=K2, alpha=ALPHA)
                     if r.random() < p_largar:
-                        #corpos.append(Corpo(x, y))
-                        mapa.matriz[y][x] = 'C'
-                        corpos.append(Corpo(x,y))
-                        formiga.ocupado = False
-                        
+                        corpo_para_soltar = formiga.corpo_carregado
+                        corpo_para_soltar.x, corpo_para_soltar.y = x, y
+                        mapa.adicionar_corpo(corpo_para_soltar)
+                        formiga.corpo_carregado = None
             else:
-                if mapa.matriz[y][x] == 'C':
-                    p_pegar = formiga.probabilidade_pegar(mapa)
+                # Se há um corpo na posição atual, avalia pegar
+                corpo_no_local = mapa.obter_corpo_em(x, y)
+                if corpo_no_local is not None:
+                    p_pegar = formiga.probabilidade_pegar(mapa, corpo_no_local, k1=K1, alpha=ALPHA)
                     if r.random() < p_pegar:
-                        mapa.matriz[y][x] = ' '
-                        corpos = [corpo for corpo in corpos
-                                  if corpo.x != x or corpo.y != y]
-                        formiga.ocupado = True
-            
+                        formiga.corpo_carregado = mapa.remover_corpo(x, y)
+
+            # Move a formiga para a próxima posição
             direcao = r.choice(['cima', 'baixo', 'esquerda', 'direita'])
             formiga.mover(direcao, LARGURA, ALTURA)
             
-        if i == 1 or i == 99999:
-            print(f'Iteracao {i + 1}')
-            print_mapa(mapa, corpos, formigas)
+            
+    #Exibir o mapa a cada 50000 iterações
+    if(iteracao+1) % 50000 == 0:
+        print(f"Iteração {iteracao+1}:")
+        print_mapa_grupos(mapa, formigas)
         
-        # densidade = formigas[0].calcular_densidade_local(mapa)
-        # print(formigas[0].y, formigas[0].x)
-        # print(f'Densidade local da formiga 0: {densidade}')
-        # sleep(0.5)
-        #subprocess.call('clear', shell=True)
-        
-        pass
-    
-    
