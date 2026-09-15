@@ -2,29 +2,25 @@
 
 class Formiga:
     
-    def __init__(self, x, y, raio, ocupado=False):
+    def __init__(self, x, y, raio):
         self.x = x
         self.y = y
         self.raio = raio
-        self.ocupado = ocupado
+        self.corpo = None
+        
+    @property
+    def ocupado(self):
+        return self.corpo is not None
         
     def mover(self, direcao, largura, altura):
         if direcao == 'cima':
-            self.y = self.y -1
-            if self.y < 0:
-                self.y = altura - 1
+            self.y = (self.y - 1) % altura
         elif direcao == 'baixo':
-            self.y = self.y + 1
-            if self.y >= altura:
-                self.y = 0
+            self.y = (self.y + 1) % altura
         elif direcao == 'esquerda':
-            self.x = self.x - 1
-            if self.x < 0:
-                self.x = largura - 1
+            self.x = (self.x - 1) % largura
         elif direcao == 'direita':
-            self.x = self.x + 1
-            if self.x >= largura:
-                self.x = 0
+            self.x = (self.x + 1) % largura
                 
     def calcular_densidade_local(self, mapa):
         corpos = 0
@@ -33,7 +29,7 @@ class Formiga:
         altura = mapa.altura
         largura = mapa.largura
         
-        for dy in range( -self.raio, self.raio+1):
+        for dy in range(-self.raio, self.raio+1):
             for dx in range(-self.raio, self.raio+1):
 
                 if(dx == 0 and dy ==0):

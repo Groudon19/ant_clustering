@@ -7,19 +7,6 @@ from mapa import Mapa
 from formiga import Formiga
 from corpo import Corpo
 
-def print_mapa(mapa, corpos, formigas):
-    
-    # for corpo in corpos:
-    #     mapa.matriz[corpo.y][corpo.x] = 'C'
-        
-    # for formiga in formigas:
-    #     mapa.matriz[formiga.y][formiga.x] = 'F'
-    
-    for i in range(mapa.largura):
-        for j in range(mapa.altura):
-            print(mapa.matriz[i][j] if not mapa.matriz[i][j] == 'F' else ' ', end=' ')
-        print(end='\n')
-
 if __name__ == '__main__':
     
     ALTURA = 50
@@ -28,31 +15,23 @@ if __name__ == '__main__':
     NUM_FORMIGAS = 15
     NUM_CORPOS = 600
     
-    ITERACOES = 400000
+    ITERACOES = 100000
     
     mapa = Mapa(ALTURA, LARGURA)
     formigas = []
-    corpos = []
     
-    for i in range(NUM_CORPOS):
+    while len(mapa.corpos) < NUM_CORPOS:
         x = r.randint(0, LARGURA-1)
         y = r.randint(0, ALTURA-1)
-        if mapa.matriz[y][x] == ' ':
-            corpos.append(Corpo(x, y))
-            mapa.matriz[y][x] = 'C'
-        else:
-            i -= 1
+        if mapa.get_corpo(x,y) is None:
+            mapa.adicionar_corpo(Corpo(x,y))
     
-    for i in range(NUM_FORMIGAS):
+    while len(formigas) <NUM_FORMIGAS:
         x = r.randint(0, LARGURA-1)
         y = r.randint(0, ALTURA-1)
-        if mapa.matriz[y][x] == ' ':
+        if mapa.get_corpo(x,y) is None:
             formigas.append(Formiga(x, y, 1))
-            mapa.matriz[y][x] = 'F'
-        else:
-            #TODO: Analisar se formiga pode nascer em cima de corpo ou não
-            i -= 1
-    
+            # mapa.matriz[y][x] = 'F'
     
     for i in range(ITERACOES):
         
@@ -61,31 +40,29 @@ if __name__ == '__main__':
             
             x = formiga.x
             y = formiga.y
+            flag_corpo = mapa.get_corpo(x,y) is not None
 
             if formiga.ocupado:
-                if mapa.matriz[y][x] == ' ': # só pode largar em célula vazia
+                if not flag_corpo: # só pode largar em célula vazia
                     p_largar = formiga.probabilidade_largar(mapa)
                     if r.random() < p_largar:
-                        #corpos.append(Corpo(x, y))
-                        mapa.matriz[y][x] = 'C'
-                        corpos.append(Corpo(x,y))
-                        formiga.ocupado = False
+                        corpo_que_sera_solto = formiga.corpo
+                        corpo_que_sera_solto.x, corpo_que_sera_solto.y = x, y
+                        mapa.adicionar_corpo(corpo_que_sera_solto)
+                        formiga.corpo = None
                         
             else:
-                if mapa.matriz[y][x] == 'C':
+                if flag_corpo:
                     p_pegar = formiga.probabilidade_pegar(mapa)
                     if r.random() < p_pegar:
-                        mapa.matriz[y][x] = ' '
-                        corpos = [corpo for corpo in corpos
-                                  if corpo.x != x or corpo.y != y]
-                        formiga.ocupado = True
+                        formiga.corpo = mapa.remover_corpo(x, y)
             
             direcao = r.choice(['cima', 'baixo', 'esquerda', 'direita'])
             formiga.mover(direcao, LARGURA, ALTURA)
             
-        if i == 1 or i == 99999 or i == 199999 or i == 399999:
+        if i == 1 or i == 99999:
             print(f'Iteracao {i + 1}')
-            print_mapa(mapa, corpos, formigas)
+            mapa.print()
         
         # densidade = formigas[0].calcular_densidade_local(mapa)
         # print(formigas[0].y, formigas[0].x)
