@@ -39,7 +39,7 @@ class Formiga:
                 y = (self.y + dy) % altura
                 celulas_vistas += 1
 
-                if mapa.matriz[y][x] == 'C':
+                if mapa.get_corpo(x,y) is not None:
                     corpos += 1
 
         if(celulas_vistas == 0):

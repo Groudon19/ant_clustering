@@ -10,7 +10,7 @@ class Mapa:
         
     def adicionar_corpo(self, corpo):
         self.corpos[(corpo.x, corpo.y)] = corpo
-        self.matriz[corpo.y][corpo.x] = 'C'
+        self.matriz[corpo.y][corpo.x] = corpo.grupo
         
     def remover_corpo(self, x, y):
         corpo = self.corpos.pop((x,y), None)
@@ -24,8 +24,11 @@ class Mapa:
         for i in range(self.altura):
             for j in range(self.largura):
                 print(self.matriz[j][i], end=' ')
-            print(end='\n')
+            print()
         
+    def print_corpos(self):
+        for corpo in self.corpos.values():
+            print(f'Corpo em ({corpo.x}, {corpo.y}) com atributos {corpo.atributos} e grupo {corpo.grupo}')
                 
     
                 

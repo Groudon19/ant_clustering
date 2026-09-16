@@ -6,6 +6,7 @@ from time import sleep
 from mapa import Mapa
 from formiga import Formiga
 from corpo import Corpo
+from utils import carregar_atributos_e_grupos
 
 if __name__ == '__main__':
     
@@ -20,13 +21,15 @@ if __name__ == '__main__':
     mapa = Mapa(ALTURA, LARGURA)
     formigas = []
     
-    while len(mapa.corpos) < NUM_CORPOS:
+    atributos, grupos = carregar_atributos_e_grupos('base15.txt')
+    
+    for atributos_corpo, grupo_corpo in zip(atributos, grupos):
         x = r.randint(0, LARGURA-1)
         y = r.randint(0, ALTURA-1)
         if mapa.get_corpo(x,y) is None:
-            mapa.adicionar_corpo(Corpo(x,y))
+            mapa.adicionar_corpo(Corpo(x,y, atributos_corpo, grupo_corpo))
     
-    while len(formigas) <NUM_FORMIGAS:
+    while len(formigas) < NUM_FORMIGAS:
         x = r.randint(0, LARGURA-1)
         y = r.randint(0, ALTURA-1)
         if mapa.get_corpo(x,y) is None:
@@ -71,5 +74,7 @@ if __name__ == '__main__':
         #subprocess.call('clear', shell=True)
         
         pass
+    
+    # mapa.print_corpos()
     
     
