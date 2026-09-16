@@ -9,6 +9,9 @@ class Mapa:
         self.corpos = {}
         
     def adicionar_corpo(self, corpo):
+        if (corpo.x, corpo.y) in self.corpos:
+            # Se já existe um corpo na posição, ele é sobrescrito
+            self.remover_corpo(corpo.x, corpo.y)
         self.corpos[(corpo.x, corpo.y)] = corpo
         self.matriz[corpo.y][corpo.x] = corpo.grupo
         
@@ -23,7 +26,7 @@ class Mapa:
     def print(self):
         for i in range(self.altura):
             for j in range(self.largura):
-                print(self.matriz[j][i], end=' ')
+                print(self.matriz[i][j], end=' ')
             print()
         
     def print_corpos(self):

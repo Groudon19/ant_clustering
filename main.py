@@ -14,7 +14,7 @@ if __name__ == '__main__':
     LARGURA = 50
     
     NUM_FORMIGAS = 15
-    NUM_CORPOS = 600
+    # NUM_CORPOS = 600
     
     ITERACOES = 100000
     
@@ -24,10 +24,12 @@ if __name__ == '__main__':
     atributos, grupos = carregar_atributos_e_grupos('base15.txt')
     
     for atributos_corpo, grupo_corpo in zip(atributos, grupos):
-        x = r.randint(0, LARGURA-1)
-        y = r.randint(0, ALTURA-1)
-        if mapa.get_corpo(x,y) is None:
-            mapa.adicionar_corpo(Corpo(x,y, atributos_corpo, grupo_corpo))
+        while True:
+            x = r.randint(0, LARGURA-1)
+            y = r.randint(0, ALTURA-1)
+            if mapa.get_corpo(x,y) is None:
+                mapa.adicionar_corpo(Corpo(x,y, atributos_corpo, grupo_corpo))
+                break
     
     while len(formigas) < NUM_FORMIGAS:
         x = r.randint(0, LARGURA-1)
@@ -63,13 +65,14 @@ if __name__ == '__main__':
             direcao = r.choice(['cima', 'baixo', 'esquerda', 'direita'])
             formiga.mover(direcao, LARGURA, ALTURA)
             
-        if i == 1 or i == 99999:
+        if i % 99999 == 0:
             print(f'Iteracao {i + 1}')
             mapa.print()
         
         # densidade = formigas[0].calcular_densidade_local(mapa)
         # print(formigas[0].y, formigas[0].x)
         # print(f'Densidade local da formiga 0: {densidade}')
+        
         # sleep(0.5)
         #subprocess.call('clear', shell=True)
         
